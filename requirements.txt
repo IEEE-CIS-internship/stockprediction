@@ -1,0 +1,14 @@
+numpy
+pandas
+yfinance
+scikit-learn
+torch
+transformers
+hmmlearn
+shap
+streamlit
+matplotlib
+seaborn
+beautifulsoup4
+requests
+urllib3

@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Data and cached checkpoints
+data/
+models/
+
+# Specific user requested files to ignore
+claudechat.txt
+IEEE_paper_draft.md
+IEEE_PAPER_DRAFT.md
