@@ -1,0 +1,31 @@
+# Market Regime Duration Statistics (HMM)
+
+| Stock        | Regime   |   Total Days | Percentage Time (%)   |   Avg Duration (days) |   Max Duration (days) |
+|:-------------|:---------|-------------:|:----------------------|----------------------:|----------------------:|
+| ADANIENT.NS  | Bullish  |         1011 | 85.17%                |                 168.5 |                   367 |
+| ADANIENT.NS  | Bearish  |           88 | 7.41%                 |                   1   |                     1 |
+| ADANIENT.NS  | Sideways |           88 | 7.41%                 |                   1   |                     1 |
+| HCLTECH.NS   | Bullish  |          594 | 50.04%                |                   1   |                     1 |
+| HCLTECH.NS   | Bearish  |            0 | 0.00%                 |                   0   |                     0 |
+| HCLTECH.NS   | Sideways |          593 | 49.96%                |                   1   |                     1 |
+| HINDALCO.NS  | Bullish  |          305 | 25.70%                |                   1   |                     1 |
+| HINDALCO.NS  | Bearish  |          568 | 47.85%                |                  56.8 |                   151 |
+| HINDALCO.NS  | Sideways |          314 | 26.45%                |                   1   |                     1 |
+| ICICIBANK.NS | Bullish  |          471 | 39.68%                |                   1   |                     1 |
+| ICICIBANK.NS | Bearish  |          244 | 20.56%                |                  30.5 |                    52 |
+| ICICIBANK.NS | Sideways |          472 | 39.76%                |                   1   |                     1 |
+| index        | Bullish  |          592 | 50.00%                |                   1   |                     1 |
+| index        | Bearish  |            0 | 0.00%                 |                   0   |                     0 |
+| index        | Sideways |          592 | 50.00%                |                   1   |                     1 |
+| INDIGO.NS    | Bullish  |          404 | 34.06%                |                   1   |                     1 |
+| INDIGO.NS    | Bearish  |          379 | 31.96%                |                  37.9 |                   116 |
+| INDIGO.NS    | Sideways |          403 | 33.98%                |                   1   |                     1 |
+| MARUTI.NS    | Bullish  |          414 | 34.88%                |                   1   |                     1 |
+| MARUTI.NS    | Bearish  |          359 | 30.24%                |                  35.9 |                    98 |
+| MARUTI.NS    | Sideways |          414 | 34.88%                |                   1   |                     1 |
+| ONGC.NS      | Bullish  |          278 | 23.42%                |                   1   |                     1 |
+| ONGC.NS      | Bearish  |          631 | 53.16%                |                  70.1 |                   176 |
+| ONGC.NS      | Sideways |          278 | 23.42%                |                   1   |                     1 |
+| TRENT.NS     | Bullish  |         1003 | 84.50%                |                 125.4 |                   414 |
+| TRENT.NS     | Bearish  |           92 | 7.75%                 |                   1   |                     1 |
+| TRENT.NS     | Sideways |           92 | 7.75%                 |                   1   |                     1 |

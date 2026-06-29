@@ -1,0 +1,52 @@
+# Layer 5: Buy/Sell/Hold Backtest Performance & Ablation Study
+
+| Stock        | Horizon   | Configuration      |     Sharpe |   Max Drawdown |   Hit Rate (%) |   Signals |
+|:-------------|:----------|:-------------------|-----------:|---------------:|---------------:|----------:|
+| ADANIENT.NS  | 1d        | Gated (Proposed)   |  0.0675369 |     -0.268431  |        44.6602 |       103 |
+| ADANIENT.NS  | 1d        | Ungated (Ablation) |  0.0675369 |     -0.268431  |        44.6602 |       103 |
+| HCLTECH.NS   | 1d        | Gated (Proposed)   |  0         |      0         |         0      |         0 |
+| HCLTECH.NS   | 1d        | Ungated (Ablation) |  0         |      0         |         0      |         0 |
+| HINDALCO.NS  | 1d        | Gated (Proposed)   |  0.850053  |     -0.0848703 |        50      |        48 |
+| HINDALCO.NS  | 1d        | Ungated (Ablation) |  0.850053  |     -0.0848703 |        50      |        48 |
+| ICICIBANK.NS | 1d        | Gated (Proposed)   | -1.33369   |     -0.23188   |        48.1928 |        83 |
+| ICICIBANK.NS | 1d        | Ungated (Ablation) | -1.33369   |     -0.23188   |        48.1928 |        83 |
+| INDIGO.NS    | 1d        | Gated (Proposed)   |  0.236336  |     -0.104086  |        45.4545 |        44 |
+| INDIGO.NS    | 1d        | Ungated (Ablation) |  0.236336  |     -0.104086  |        45.4545 |        44 |
+| MARUTI.NS    | 1d        | Gated (Proposed)   | -0.872029  |     -0.194049  |        47.5    |        40 |
+| MARUTI.NS    | 1d        | Ungated (Ablation) | -0.872029  |     -0.194049  |        47.5    |        40 |
+| ONGC.NS      | 1d        | Gated (Proposed)   | -0.132685  |     -0.10485   |        63.1579 |        38 |
+| ONGC.NS      | 1d        | Ungated (Ablation) | -0.132685  |     -0.10485   |        63.1579 |        38 |
+| TRENT.NS     | 1d        | Gated (Proposed)   |  0.153414  |     -0.199948  |        57.1429 |        56 |
+| TRENT.NS     | 1d        | Ungated (Ablation) |  0.153414  |     -0.199948  |        57.1429 |        56 |
+| ADANIENT.NS  | 3d        | Gated (Proposed)   |  0.963359  |     -0.239515  |        60.8696 |        23 |
+| ADANIENT.NS  | 3d        | Ungated (Ablation) |  0.963359  |     -0.239515  |        60.8696 |        23 |
+| HCLTECH.NS   | 3d        | Gated (Proposed)   | -0.2185    |     -0.0823766 |        60      |         5 |
+| HCLTECH.NS   | 3d        | Ungated (Ablation) | -0.2185    |     -0.0823766 |        60      |         5 |
+| HINDALCO.NS  | 3d        | Gated (Proposed)   | -1.13628   |     -0.331477  |        51.2195 |        41 |
+| HINDALCO.NS  | 3d        | Ungated (Ablation) | -1.15606   |     -0.395834  |        51.1111 |        45 |
+| ICICIBANK.NS | 3d        | Gated (Proposed)   | -0.286045  |     -0.170481  |        38.7097 |        31 |
+| ICICIBANK.NS | 3d        | Ungated (Ablation) | -0.286045  |     -0.170481  |        38.7097 |        31 |
+| INDIGO.NS    | 3d        | Gated (Proposed)   |  0.291991  |     -0.189965  |        40.625  |        32 |
+| INDIGO.NS    | 3d        | Ungated (Ablation) |  0.291991  |     -0.189965  |        40.625  |        32 |
+| MARUTI.NS    | 3d        | Gated (Proposed)   | -0.322325  |     -0.131789  |        42.8571 |        35 |
+| MARUTI.NS    | 3d        | Ungated (Ablation) | -0.322325  |     -0.131789  |        42.8571 |        35 |
+| ONGC.NS      | 3d        | Gated (Proposed)   | -1.07363   |     -0.260672  |        48.4848 |        33 |
+| ONGC.NS      | 3d        | Ungated (Ablation) | -1.07363   |     -0.260672  |        48.4848 |        33 |
+| TRENT.NS     | 3d        | Gated (Proposed)   |  0.648069  |     -0.333226  |        56.8627 |        51 |
+| TRENT.NS     | 3d        | Ungated (Ablation) |  0.648069  |     -0.333226  |        56.8627 |        51 |
+| ADANIENT.NS  | 7d        | Gated (Proposed)   |  1.03224   |     -0.344197  |        48      |        25 |
+| ADANIENT.NS  | 7d        | Ungated (Ablation) |  1.03224   |     -0.344197  |        48      |        25 |
+| HCLTECH.NS   | 7d        | Gated (Proposed)   |  0.431226  |     -0.229886  |        47.8261 |        23 |
+| HCLTECH.NS   | 7d        | Ungated (Ablation) |  0.431226  |     -0.229886  |        47.8261 |        23 |
+| HINDALCO.NS  | 7d        | Gated (Proposed)   |  0.155271  |     -0.202206  |        50      |        24 |
+| HINDALCO.NS  | 7d        | Ungated (Ablation) | -0.932942  |     -0.287959  |        45.8333 |        24 |
+| ICICIBANK.NS | 7d        | Gated (Proposed)   | -0.572188  |     -0.180112  |        52      |        25 |
+| ICICIBANK.NS | 7d        | Ungated (Ablation) | -0.572188  |     -0.180112  |        52      |        25 |
+| INDIGO.NS    | 7d        | Gated (Proposed)   | -0.426786  |     -0.193733  |        40.9091 |        22 |
+| INDIGO.NS    | 7d        | Ungated (Ablation) | -0.426786  |     -0.193733  |        40.9091 |        22 |
+| MARUTI.NS    | 7d        | Gated (Proposed)   |  0.548135  |     -0.101152  |        62.5    |        24 |
+| MARUTI.NS    | 7d        | Ungated (Ablation) |  0.612876  |     -0.180335  |        56      |        25 |
+| ONGC.NS      | 7d        | Gated (Proposed)   | -0.183165  |     -0.244136  |        45.4545 |        22 |
+| ONGC.NS      | 7d        | Ungated (Ablation) | -0.183165  |     -0.244136  |        45.4545 |        22 |
+| TRENT.NS     | 7d        | Gated (Proposed)   |  1.27989   |     -0.218556  |        56      |        25 |
+| TRENT.NS     | 7d        | Ungated (Ablation) |  1.27989   |     -0.218556  |        56      |        25 |

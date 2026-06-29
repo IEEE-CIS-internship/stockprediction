@@ -154,16 +154,25 @@ Week 4 (Upcoming)
 
 ---
 
-## 🚀 Installation & Setup (For Week 2)
+## 🚀 Setup & Installation
+
+This project is configured to run on Python 3.13.14 (the host system's default environment). Follow these commands to set up the environment and run the project:
 
 ```bash
-# Clone the repository
-git clone https://github.com/vedant-0789/stockprediction.git
-cd stockprediction
+# 1. Create and activate virtual environment
+python -m venv venv
+venv\Scripts\activate
 
-# Install requirements
-pip install -r requirements.txt
+# 2. Upgrade pip
+python -m pip install --upgrade pip
 
-# Launch Dashboard
-streamlit run app.py
+# 3. Install dependencies (CPU PyTorch and required forecasting stack)
+pip install pandas numpy scikit-learn
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install hmmlearn transformers
+pip install yfinance feedparser requests
+pip install fastapi uvicorn[standard] pydantic
+pip install streamlit quantstats
+pip install matplotlib seaborn plotly
+pip install python-dotenv pytest
 ```
