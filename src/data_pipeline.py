@@ -16,6 +16,55 @@ MACRO_TICKERS = {
     "usdinr": "USDINR=X"   # USD/INR Exchange Rate
 }
 
+# Simple ticker mapping used by the Streamlit dashboard
+TICKERS = {
+    "ICICI Bank": "ICICIBANK.NS",
+    "HCL Technologies": "HCLTECH.NS",
+    "IndiGo": "INDIGO.NS",
+    "Maruti Suzuki": "MARUTI.NS",
+    "Trent": "TRENT.NS",
+    "Hindalco": "HINDALCO.NS",
+    "ONGC": "ONGC.NS",
+    "Adani Enterprises": "ADANIENT.NS",
+}
+
+
+def download_stock_data(stock_name, ticker_symbol):
+    """Download and preprocess a single stock for the dashboard app."""
+    try:
+        df = yf.download(ticker_symbol, period="2y", interval="1d", progress=False)
+    except Exception as exc:
+        print(f"Failed to download {ticker_symbol}: {exc}")
+        return pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume", "returns", "sma_20", "sma_50", "volatility_30"])
+
+    if df.empty:
+        return pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume", "returns", "sma_20", "sma_50", "volatility_30"])
+
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
+    if "Date" in df.columns:
+        df = df.reset_index(drop=True)
+        df.rename(columns={"Date": "date", "Open": "open", "High": "high", "Low": "low", "Close": "close", "Volume": "volume"}, inplace=True)
+    elif "date" in df.columns:
+        df = df.reset_index(drop=True)
+        df.rename(columns={"date": "date", "open": "open", "high": "high", "low": "low", "close": "close", "volume": "volume"}, inplace=True)
+    else:
+        df = df.reset_index()
+        df.rename(columns={"index": "date", "Open": "open", "High": "high", "Low": "low", "Close": "close", "Volume": "volume"}, inplace=True)
+
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.sort_values("date").reset_index(drop=True)
+
+    df["returns"] = df["close"].pct_change()
+    df["sma_20"] = df["close"].rolling(window=20, min_periods=1).mean()
+    df["sma_50"] = df["close"].rolling(window=50, min_periods=1).mean()
+    df["volatility_30"] = df["returns"].rolling(window=30, min_periods=1).std()
+    df[["sma_20", "sma_50", "volatility_30"]] = df[["sma_20", "sma_50", "volatility_30"]].ffill().fillna(0.0)
+    df["returns"] = df["returns"].fillna(0.0)
+    df["stock_name"] = stock_name
+    return df
+
 # Rule-based sentiment lexicons as a fallback
 POSITIVE_WORDS = {"bullish", "growth", "profit", "gain", "rise", "surge", "higher", "positive", "beat", "strong", "outperform", "buy", "lead", "expand", "record", "recovery"}
 NEGATIVE_WORDS = {"bearish", "loss", "decline", "fall", "drop", "lower", "negative", "miss", "weak", "underperform", "sell", "lag", "shrink", "crash", "slump", "concern"}
@@ -108,7 +157,8 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     
     # Define date range
-    end_date = datetime.date.today()
+    # yfinance treats end= as exclusive, so include the latest available market day.
+    end_date = datetime.date.today() + datetime.timedelta(days=1)
     start_date = end_date - datetime.timedelta(days=args.years * 365)
     
     print(f"Data Pipeline starting. Period: {start_date} to {end_date}")

@@ -75,8 +75,11 @@ st.sidebar.header("🛠️ System Controls")
 
 # Fetch available tickers
 try:
-    tickers_resp = requests.get(f"{API_URL}/api/tickers").json()
+    tickers_resp = requests.get(f"{API_URL}/api/tickers", timeout=8).json()
     tickers_list = tickers_resp["tickers"]
+    if not tickers_list:
+        tickers_list = ["ICICIBANK.NS", "INDIGO.NS", "MARUTI.NS", "TRENT.NS", "HCLTECH.NS", "HINDALCO.NS", "ONGC.NS", "ADANIENT.NS"]
+        st.sidebar.warning("No processed feature files found on the backend yet.")
 except Exception:
     tickers_list = ["ICICIBANK.NS", "INDIGO.NS", "MARUTI.NS", "TRENT.NS", "HCLTECH.NS", "HINDALCO.NS", "ONGC.NS", "ADANIENT.NS"]
     st.sidebar.error("Could not connect to FastAPI backend server. Ensure backend is running at http://127.0.0.1:8000.")
@@ -88,6 +91,34 @@ horizon_label = st.sidebar.selectbox("Forecast Horizon", list(horizon_map.keys()
 horizon = horizon_map[horizon_label]
 
 lookback_days = st.sidebar.slider("Historical Data Points", min_value=50, max_value=300, value=120)
+
+if st.sidebar.button("Refresh Selected Data"):
+    with st.spinner(f"Refreshing {ticker} from yFinance..."):
+        try:
+            refresh_resp = requests.post(f"{API_URL}/api/refresh/{ticker}", timeout=300)
+            if refresh_resp.ok:
+                st.cache_data.clear()
+                st.sidebar.success(f"{ticker} refreshed.")
+                st.rerun()
+            else:
+                detail = refresh_resp.json().get("detail", refresh_resp.text)
+                st.sidebar.error(f"Refresh failed: {detail}")
+        except Exception as exc:
+            st.sidebar.error(f"Refresh failed: {exc}")
+
+if st.sidebar.button("Refresh All Data"):
+    with st.spinner("Refreshing all project tickers from yFinance..."):
+        try:
+            refresh_resp = requests.post(f"{API_URL}/api/refresh/all", timeout=600)
+            if refresh_resp.ok:
+                st.cache_data.clear()
+                st.sidebar.success("All tickers refreshed.")
+                st.rerun()
+            else:
+                detail = refresh_resp.json().get("detail", refresh_resp.text)
+                st.sidebar.error(f"Refresh failed: {detail}")
+        except Exception as exc:
+            st.sidebar.error(f"Refresh failed: {exc}")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
@@ -103,20 +134,39 @@ st.sidebar.markdown("""
 # -----------------------------------------------------------------------------
 @st.cache_data(ttl=10)
 def fetch_api_data(ticker_val, horizon_val, limit_val):
+    def api_get(path):
+        response = requests.get(f"{API_URL}{path}", timeout=15)
+        payload = response.json()
+        if not response.ok:
+            detail = payload.get("detail", response.text) if isinstance(payload, dict) else response.text
+            return {"error": detail, "status_code": response.status_code}
+        return payload
+
     try:
-        data_resp = requests.get(f"{API_URL}/api/data/{ticker_val}?limit={limit_val}").json()
-        regime_resp = requests.get(f"{API_URL}/api/regime/{ticker_val}").json()
-        forecast_resp = requests.get(f"{API_URL}/api/forecast/{ticker_val}?horizon={horizon_val}").json()
-        explain_resp = requests.get(f"{API_URL}/api/explain/{ticker_val}?horizon={horizon_val}").json()
-        backtest_resp = requests.get(f"{API_URL}/api/backtest/{ticker_val}?horizon={horizon_val}").json()
+        data_resp = api_get(f"/api/data/{ticker_val}?limit={limit_val}")
+        regime_resp = api_get(f"/api/regime/{ticker_val}")
+        forecast_resp = api_get(f"/api/forecast/{ticker_val}?horizon={horizon_val}")
+        explain_resp = api_get(f"/api/explain/{ticker_val}?horizon={horizon_val}")
+        backtest_resp = api_get(f"/api/backtest/{ticker_val}?horizon={horizon_val}")
         return data_resp, regime_resp, forecast_resp, explain_resp, backtest_resp
-    except Exception as e:
+    except Exception:
         return None, None, None, None, None
 
 data_payload, regime_payload, forecast_payload, explain_payload, backtest_payload = fetch_api_data(ticker, horizon, lookback_days)
 
 if data_payload is None:
     st.warning("FastAPI backend is offline. Start the server using: `uvicorn backend.app:app`")
+elif any(isinstance(payload, dict) and "error" in payload for payload in [data_payload, regime_payload, forecast_payload, explain_payload, backtest_payload]):
+    st.error("Dashboard data is not available for the selected ticker yet.")
+    for label, payload in [
+        ("Market data", data_payload),
+        ("Regime", regime_payload),
+        ("Forecast", forecast_payload),
+        ("Explainability", explain_payload),
+        ("Backtest", backtest_payload),
+    ]:
+        if isinstance(payload, dict) and "error" in payload:
+            st.info(f"{label}: {payload['error']}")
 else:
     # -------------------------------------------------------------------------
     # Row 1: KPI Panels

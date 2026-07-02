@@ -16,3 +16,14 @@ paper/
 prompt.md
 prompt2.md
 scratch/
+
+# Local server/runtime logs
+backend_server.log
+backend_server.err.log
+streamlit_server.log
+streamlit_server.err.log
+
+# Python/runtime caches
+__pycache__/
+.pytest_cache/
+*.pyc
