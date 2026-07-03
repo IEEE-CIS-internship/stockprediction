@@ -33,6 +33,26 @@ class DataPipelineTests(unittest.TestCase):
         self.assertIn("volatility_30", df.columns)
         self.assertGreaterEqual(len(df), 2)
 
+    def test_corporate_actions_with_dividends_only(self):
+        actions = pd.DataFrame(
+            {"Dividends": [2.0, 2.5]},
+            index=pd.to_datetime(["2024-01-02", "2024-06-01"]),
+        )
+        actions = actions.reset_index().rename(columns={"index": "Date"})
+        actions.rename(
+            columns={"Date": "date", "Stock Splits": "stock_splits", "Dividends": "dividends"},
+            inplace=True,
+        )
+        for col in ("stock_splits", "dividends"):
+            if col not in actions.columns:
+                actions[col] = 0.0
+        actions = actions[["date", "stock_splits", "dividends"]]
+
+        self.assertIn("stock_splits", actions.columns)
+        self.assertIn("dividends", actions.columns)
+        self.assertEqual(actions["stock_splits"].tolist(), [0.0, 0.0])
+        self.assertEqual(actions["dividends"].tolist(), [2.0, 2.5])
+
 
 if __name__ == "__main__":
     unittest.main()

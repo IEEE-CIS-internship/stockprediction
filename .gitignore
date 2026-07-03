@@ -1,14 +1,27 @@
 # Python
 __pycache__/
 *.pyc
-venv/
-.env
+.pytest_cache/
+*.egg-info/
+dist/
+build/
 
-# Data and cached checkpoints
+# Environments & secrets
+venv/
+.venv/
+.env
+.env.*
+
+# Generated / large artifacts (reproducible from src/)
 data/
 models/
+outputs/
+experiments/
 
-# Specific user requested files to ignore
+# Local server/runtime logs (includes *.err.log)
+*.log
+
+# Personal / draft work
 claudechat.txt
 IEEE_paper_draft.md
 IEEE_PAPER_DRAFT.md
@@ -17,13 +30,10 @@ prompt.md
 prompt2.md
 scratch/
 
-# Local server/runtime logs
-backend_server.log
-backend_server.err.log
-streamlit_server.log
-streamlit_server.err.log
-
-# Python/runtime caches
-__pycache__/
-.pytest_cache/
-*.pyc
+# Tooling / OS
+.agents/
+.ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+Thumbs.db

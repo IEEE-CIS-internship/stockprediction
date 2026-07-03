@@ -6,72 +6,201 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 
+THEMES = {
+    "dark": {
+        "accent_soft": "#5eead4",
+        "bullish": "#3dd68c",
+        "bearish": "#f87171",
+        "sideways": "#fbbf24",
+        "hold": "#94a3b8",
+        "chart_bg": "#161b28",
+        "grid": "#252b3d",
+        "border": "#2d3650",
+        "text": "#f0f2f8",
+        "muted": "#8b93a8",
+        "bg": "#0f111a",
+        "regime_alpha": 0.18,
+    },
+    "light": {
+        "accent_soft": "#0e7490",
+        "bullish": "#059669",
+        "bearish": "#dc2626",
+        "sideways": "#d97706",
+        "hold": "#64748b",
+        "chart_bg": "#ffffff",
+        "grid": "#e2e8f0",
+        "border": "#e2e8f0",
+        "text": "#0b1c30",
+        "muted": "#64748b",
+        "bg": "#f5f7fb",
+        "regime_alpha": 0.22,
+    },
+}
+
+THEME_CSS = """
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap');
+
+    .dashboard-title {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 2.1rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.25;
+        margin: 0 0 0.35rem 0;
+        padding: 0;
+    }
+    .dashboard-title .brand {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    .dashboard-title .tagline {
+        color: var(--text-color);
+        font-weight: 600;
+    }
+    .dashboard-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-color);
+        opacity: 0.65;
+        margin: 0 0 1.25rem 0;
+    }
+
+    .metric-card {
+        background: var(--secondary-background-color);
+        padding: 18px 20px;
+        border-radius: 10px;
+        border: 1px solid rgba(128, 128, 128, 0.25);
+        border-left: 4px solid var(--primary-color);
+        margin-bottom: 12px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+    .metric-card.forecast {
+        border-left-color: var(--primary-color);
+    }
+    .metric-label {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-color);
+        opacity: 0.6;
+    }
+    .metric-value {
+        margin: 8px 0 6px;
+        font-family: 'Inter', sans-serif;
+        font-size: 1.65rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    .metric-foot {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-color);
+        opacity: 0.5;
+    }
+
+    .recommendation-card {
+        background: var(--secondary-background-color);
+        padding: 20px 22px;
+        border-radius: 10px;
+        border: 1px solid rgba(128, 128, 128, 0.25);
+        border-left: 4px solid var(--primary-color);
+        margin-bottom: 20px;
+        font-size: 1.05rem;
+        line-height: 1.65;
+        color: var(--text-color);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    h3 {
+        color: var(--text-color) !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important;
+    }
+
+    div[data-testid="stDataFrame"] {
+        border: 1px solid rgba(128, 128, 128, 0.25);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+</style>
+"""
+
+
+def theme_base() -> str:
+    ctx = st.context.theme
+    base = ctx.get("base") if hasattr(ctx, "get") else getattr(ctx, "base", None)
+    if base in ("light", "dark"):
+        return base
+    return st.get_option("theme.base") or "dark"
+
+
+def chart_palette() -> dict:
+    palette = THEMES[theme_base()].copy()
+    ctx = st.context.theme
+    if hasattr(ctx, "get"):
+        if ctx.get("backgroundColor"):
+            palette["bg"] = ctx["backgroundColor"]
+        if ctx.get("secondaryBackgroundColor"):
+            palette["chart_bg"] = ctx["secondaryBackgroundColor"]
+        if ctx.get("textColor"):
+            palette["text"] = ctx["textColor"]
+    return palette
+
+
+def apply_mpl_theme(palette: dict) -> None:
+    plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
+    plt.rcParams.update({
+        "figure.facecolor": palette["chart_bg"],
+        "axes.facecolor": palette["chart_bg"],
+        "savefig.facecolor": palette["chart_bg"],
+        "text.color": palette["text"],
+        "axes.labelcolor": palette["muted"],
+        "xtick.color": palette["muted"],
+        "ytick.color": palette["muted"],
+        "grid.color": palette["grid"],
+        "axes.edgecolor": palette["border"],
+        "font.size": 9,
+    })
+
+
+def finalize_chart(fig, ax, palette: dict) -> None:
+    fig.patch.set_facecolor(palette["chart_bg"])
+    ax.set_facecolor(palette["chart_bg"])
+    for spine in ax.spines.values():
+        spine.set_color(palette["border"])
+
 # Configure page layout
 st.set_page_config(
     page_title="AuraTrade AI Dashboard",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
-
-# Apply premium styling
-st.markdown("""
-<style>
-    .reportview-container {
-        background-color: #0f111a;
-    }
-    .main {
-        background-color: #0f111a;
-        color: white;
-    }
-    div.stButton > button:first-child {
-        background-color: #17becf;
-        color: white;
-        border-radius: 6px;
-    }
-    .metric-card {
-        background-color: #151722;
-        padding: 18px;
-        border-radius: 8px;
-        border: 1px solid #2e3039;
-        margin-bottom: 12px;
-    }
-    .recommendation-card {
-        background-color: #182232;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #1f3554;
-        margin-bottom: 20px;
-        font-size: 1.05rem;
-        line-height: 1.6;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Configure Matplotlib styles
-plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
-plt.rcParams.update({
-    "figure.facecolor": "#0f111a",
-    "axes.facecolor": "#151722",
-    "savefig.facecolor": "#0f111a",
-    "text.color": "white",
-    "axes.labelcolor": "white",
-    "xtick.color": "white",
-    "ytick.color": "white",
-    "grid.color": "#2e3039",
-    "axes.edgecolor": "#2e3039",
-    "font.size": 9
-})
 
 API_URL = "http://127.0.0.1:8000"
 
-st.title("⚡ AuraTrade AI: Decoupled Swing Trading Intelligence")
-st.caption("Gaussian HMM Regime-Gated Mixture-of-Experts (MoE) Forecasting System")
+palette = chart_palette()
+st.markdown(THEME_CSS, unsafe_allow_html=True)
+apply_mpl_theme(palette)
 
 # -----------------------------------------------------------------------------
 # Sidebar Configuration
 # -----------------------------------------------------------------------------
 st.sidebar.header("🛠️ System Controls")
+st.markdown(
+    """
+    <h1 class="dashboard-title">
+        <span class="brand">AuraTrade AI</span><span class="tagline">: Decoupled Swing Trading Intelligence</span>
+    </h1>
+    <p class="dashboard-subtitle">Gaussian HMM Regime-Gated Mixture-of-Experts (MoE) Forecasting System</p>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Fetch available tickers
 try:
@@ -119,15 +248,6 @@ if st.sidebar.button("Refresh All Data"):
                 st.sidebar.error(f"Refresh failed: {detail}")
         except Exception as exc:
             st.sidebar.error(f"Refresh failed: {exc}")
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("""
-**System Architecture:**
-1. **Exogenous Ingest**: Brent crude, USD/INR, News RSS RSS headlines.
-2. **Dynamic Gating**: 3-State Gaussian HMM (Bullish, Bearish, Sideways).
-3. **MoE Forecast**: Shared LSTM backbone routing outputs to expert networks.
-4. **Attribution**: Gradient-based saliency mappings.
-""")
 
 # -----------------------------------------------------------------------------
 # Fetch Data from REST endpoints
@@ -179,14 +299,13 @@ else:
         regime_idx = regime_payload["regime_index"]
         probs = regime_payload["probabilities"]
         
-        regime_colors = {"Bullish": "#2ca02c", "Bearish": "#d62728", "Sideways": "#ff7f0e"}
-        color = regime_colors.get(regime, "white")
-        
+        regime_colors = {"Bullish": palette["bullish"], "Bearish": palette["bearish"], "Sideways": palette["sideways"]}
+        color = regime_colors.get(regime, palette["text"])        
         st.markdown(f"""
-        <div class="metric-card">
-            <h4 style="margin:0;color:#7f7f7f;">Market Regime State</h4>
-            <h2 style="margin:5px 0;color:{color};">{regime}</h2>
-            <p style="margin:0;font-size:0.85rem;color:#7f7f7f;">Gated via HMM Posterior Probabilities</p>
+        <div class="metric-card regime" style="--card-accent: {color}; border-left-color: {color};">
+            <h4 class="metric-label">Market Regime State</h4>
+            <h2 class="metric-value" style="color:{color};">{regime}</h2>
+            <p class="metric-foot">Gated via HMM Posterior Probabilities</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -197,30 +316,32 @@ else:
         sell_thresh = forecast_payload["volatility_threshold_sell"]
         
         st.markdown(f"""
-        <div class="metric-card">
-            <h4 style="margin:0;color:#7f7f7f;">Predicted Residual Return</h4>
-            <h2 style="margin:5px 0;color:#17becf;">{pred_ret * 100:+.3f}%</h2>
-            <p style="margin:0;font-size:0.85rem;color:#7f7f7f;">Buy: &gt; {buy_thresh*100:.2f}% | Sell: &lt; {sell_thresh*100:.2f}%</p>
+        <div class="metric-card forecast">
+            <h4 class="metric-label">Predicted Residual Return</h4>
+            <h2 class="metric-value" style="color:{palette['accent_soft']};">{pred_ret * 100:+.3f}%</h2>
+            <p class="metric-foot">Buy: &gt; {buy_thresh*100:.2f}% | Sell: &lt; {sell_thresh*100:.2f}%</p>
         </div>
         """, unsafe_allow_html=True)
         
     with col3:
         # Trading Signal Card
         signal = forecast_payload["trading_signal"]
-        signal_colors = {"BUY": "#2ca02c", "SELL": "#d62728", "HOLD": "#7f7f7f"}
-        sig_color = signal_colors.get(signal, "white")
-        
+        signal_colors = {"BUY": palette["bullish"], "SELL": palette["bearish"], "HOLD": palette["hold"]}
+        sig_color = signal_colors.get(signal, palette["text"])        
         st.markdown(f"""
-        <div class="metric-card">
-            <h4 style="margin:0;color:#7f7f7f;">AuraTrade Signal</h4>
-            <h2 style="margin:5px 0;color:{sig_color};">{signal}</h2>
-            <p style="margin:0;font-size:0.85rem;color:#7f7f7f;">Confidence Gate Ablated &amp; Applied</p>
+        <div class="metric-card signal" style="--card-accent: {sig_color}; border-left-color: {sig_color};">
+            <h4 class="metric-label">AuraTrade Signal</h4>
+            <h2 class="metric-value" style="color:{sig_color};">{signal}</h2>
+            <p class="metric-foot">Confidence Gate Ablated &amp; Applied</p>
         </div>
         """, unsafe_allow_html=True)
 
     # -------------------------------------------------------------------------
     # Row 2: Charts
     # -------------------------------------------------------------------------
+    palette = chart_palette()
+    apply_mpl_theme(palette)
+
     col_chart, col_explain = st.columns([3, 2])
     
     with col_chart:
@@ -244,25 +365,27 @@ else:
         dates = df_plot["date"].values
         prices = df_plot["close"].values
         
-        ax.plot(dates, prices, color="#17becf", label=f"{ticker} Close", linewidth=2.0)
+        regime_fill = {0: palette["bullish"], 1: palette["bearish"], 2: palette["sideways"]}
+
+        ax.plot(dates, prices, color=palette["accent_soft"], label=f"{ticker} Close", linewidth=2.2)
         
-        # Shading regions
-        # Bullish (0) -> Green, Bearish (1) -> Red, Sideways (2) -> Orange
-        # Shade each daily segment
         if "regime" in df_plot.columns:
             df_plot["regime"] = df_plot["regime"].fillna(2)
             reg_vals = df_plot["regime"].values
             for i in range(len(dates) - 1):
                 state = int(reg_vals[i])
-                if state == 0:
-                    ax.axvspan(dates[i], dates[i+1], color="green", alpha=0.15)
-                elif state == 1:
-                    ax.axvspan(dates[i], dates[i+1], color="red", alpha=0.15)
-                else:
-                    ax.axvspan(dates[i], dates[i+1], color="orange", alpha=0.15)
+                ax.axvspan(
+                    dates[i], dates[i + 1],
+                    color=regime_fill.get(state, palette["sideways"]),
+                    alpha=palette["regime_alpha"],
+                )
                     
-        ax.set_ylabel("Price (INR)", color="white")
-        ax.set_title(f"Regime Timeline Segmentation Chart ({ticker})", color="white", fontsize=11)
+        ax.set_ylabel("Price (INR)", color=palette["muted"])
+        ax.set_title(f"Regime Timeline Segmentation Chart ({ticker})", color=palette["text"], fontsize=11, pad=10)
+        ax.grid(True, linestyle="--", alpha=0.35)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        finalize_chart(fig, ax, palette)
         plt.tight_layout()
         st.pyplot(fig)
         plt.close(fig)
@@ -277,11 +400,15 @@ else:
         
         fig, ax = plt.subplots(figsize=(6, 4.5))
         # Color bar based on sign of attribution
-        colors = ["#2ca02c" if val >= 0 else "#d62728" for val in df_attr["Attribution (%)"]]
+        colors = [palette["bullish"] if val >= 0 else palette["bearish"] for val in df_attr["Attribution (%)"]]
         sns.barplot(data=df_attr, x="Attribution (%)", y="Feature", palette=colors, hue="Feature", legend=False, ax=ax)
-        ax.set_xlabel("Attribution Contribution (%)", color="white")
-        ax.set_ylabel("Input Features", color="white")
-        ax.set_title("Neural Feature Saliency (Top 8 Drivers)", color="white", fontsize=11)
+        ax.set_xlabel("Attribution Contribution (%)", color=palette["muted"])
+        ax.set_ylabel("Input Features", color=palette["muted"])
+        ax.set_title("Neural Feature Saliency (Top 8 Drivers)", color=palette["text"], fontsize=11, pad=10)
+        ax.grid(True, axis="x", linestyle="--", alpha=0.35)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        finalize_chart(fig, ax, palette)
         plt.tight_layout()
         st.pyplot(fig)
         plt.close(fig)
@@ -331,7 +458,7 @@ else:
                     "Ungated MoE (Ablated)": int(ungated_record["Signals"])
                 }
             ])
-            st.dataframe(df_compare, hide_index=True, use_container_width=True)
+            st.dataframe(df_compare, hide_index=True, width="stretch")
             
             st.markdown("""
             > [!TIP]
@@ -344,7 +471,7 @@ else:
         # Load pre-saved backtest equity curves png
         fig_path = f"outputs/figures/{ticker}_backtest_equity_h{horizon}.png"
         if os.path.exists(fig_path):
-            st.image(fig_path, use_column_width=True)
+            st.image(fig_path, width="stretch")
         else:
             st.info("Backtest equity curve chart not found.")
             
