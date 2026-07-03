@@ -122,7 +122,7 @@ def run_moe_inference(ticker: str, horizon: int, df_stock: pd.DataFrame):
     # Load scaler & model weights
     scaler_moe_file = os.path.join(MODELS_DIR, f"{ticker}_scaler_moe.pkl")
     scaler_target_file = os.path.join(MODELS_DIR, f"{ticker}_scaler_target_h{horizon}.pkl")
-    moe_model_file = os.path.join(MODELS_DIR, f"{ticker}_moe_h{horizon}.pt")
+    moe_model_file = os.path.join(MODELS_DIR, f"{ticker}_moe_v2_h{horizon}.pt")
     
     if not os.path.exists(scaler_moe_file) or not os.path.exists(scaler_target_file) or not os.path.exists(moe_model_file):
         return run_statistical_inference(ticker, horizon, df_stock)

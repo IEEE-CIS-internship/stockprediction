@@ -14,7 +14,7 @@ venv/
 
 # Generated / large artifacts (reproducible from src/)
 data/
-models/
+/models/
 outputs/
 experiments/
 
@@ -28,6 +28,7 @@ IEEE_PAPER_DRAFT.md
 paper/
 prompt.md
 prompt2.md
+fixprompt*.md
 scratch/
 
 # Tooling / OS
