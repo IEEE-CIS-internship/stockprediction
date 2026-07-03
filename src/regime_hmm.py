@@ -3,6 +3,8 @@ import argparse
 import pandas as pd
 import numpy as np
 from hmmlearn import hmm
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 # Professional styling

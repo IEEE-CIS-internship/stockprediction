@@ -9,8 +9,44 @@ import torch
 
 # Import MoE architecture
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "models"))
-from regime_gated import RegimeConditionedMoE
+sys.path.append(os.path.dirname(__file__))
+from models import RegimeConditionedMoE
+
+
+class ExplainabilityEngine:
+    def __init__(self, feature_names):
+        self.feature_names = feature_names
+
+    def get_gradient_attributions(self, model, x, regime_probs, is_moe=True):
+        if not hasattr(model, "backbone"):
+            return {name: 0.0 for name in self.feature_names}
+
+        with torch.enable_grad():
+            x_tensor = x.clone().detach().requires_grad_(True)
+            regime_tensor = regime_probs.clone().detach().requires_grad_(False)
+            pred = model(x_tensor, regime_tensor)
+            pred.backward()
+            grads = x_tensor.grad.detach().cpu().numpy()
+
+        if grads.ndim == 3:
+            attr = np.mean(np.abs(grads), axis=0)
+        else:
+            attr = np.abs(grads)
+
+        total = float(np.sum(attr)) if np.sum(attr) > 0 else 1.0
+        return {name: float(val / total * 100.0) for name, val in zip(self.feature_names, np.mean(attr, axis=0))}
+
+    def generate_trading_summary(self, ticker_name, current_price, target_price, horizon, regime_probs, attributions):
+        regime_names = ["Bullish", "Bearish", "Sideways"]
+        best_regime = regime_names[int(np.argmax(regime_probs))]
+        signal = "BUY" if target_price > current_price else "SELL"
+        top_features = sorted(attributions.items(), key=lambda item: abs(item[1]), reverse=True)[:3]
+        feature_text = ", ".join([f"{name} ({value:+.1f}%)" for name, value in top_features])
+        return (
+            f"For {ticker_name}, the model favors a {best_regime.lower()} regime and suggests a {signal} bias over the next {horizon} days. "
+            f"The strongest drivers are {feature_text}."
+        )
+
 
 def generate_recommendation_text(ticker, horizon, signal, regime, confidence, top_features):
     """
